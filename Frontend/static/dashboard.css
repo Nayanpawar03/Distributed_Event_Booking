@@ -16,55 +16,178 @@ p {
   margin-bottom: 30px;
 }
 
+/* ===== EVENT GRID ===== */
 .event-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 25px;
-  padding: 0 30px;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 40px;
 }
 
 .event-card {
+  display: flex;
+  flex-direction: column;
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  border-radius: 16px;
   overflow: hidden;
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-align: left;
 }
 
 .event-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+  transform: translateY(-8px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
 
 .event-card img {
   width: 100%;
-  height: 160px;
+  height: 220px;
   object-fit: cover;
+}
+
+.event-details {
+  padding: 20px;
 }
 
 .event-card h3 {
   color: #333;
-  margin: 12px 0 5px;
+  margin: 8px 0 10px;
+  font-size: 1.4em;
 }
 
 .event-card p {
   color: #666;
-  font-size: 0.9em;
-  margin: 0 15px 15px;
+  font-size: 0.95em;
+  margin-bottom: 18px;
+  line-height: 1.4;
 }
 
+/* ===== BUTTONS ===== */
 .btn {
   display: inline-block;
-  margin-bottom: 15px;
   background: #BADFDB;
   color: #333;
-  padding: 10px 20px;
+  padding: 10px 22px;
   border-radius: 8px;
   text-decoration: none;
-  transition: background 0.3s;
+  font-weight: 600;
+  transition: background 0.3s, transform 0.2s;
+  border: none;
+  cursor: pointer;
 }
 
 .btn:hover {
   background: #FFA4A4;
   color: white;
+  transform: scale(1.05);
+}
+
+/* ===== MODAL ===== */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(2px);
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 600px;
+  padding: 30px 25px;
+  text-align: left;
+  box-shadow: 0 4px 25px rgba(0,0,0,0.2);
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content h2 {
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.category-tag {
+  display: inline-block;
+  background: #FFBDBD;
+  color: #333;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 0.9em;
+  margin-bottom: 15px;
+}
+
+.modal-content p {
+  color: #555;
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+.modal-info p {
+  margin: 8px 0;
+  color: #333;
+  font-weight: 500;
+}
+
+.close {
+  float: right;
+  font-size: 1.5em;
+  color: #FFA4A4;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.close:hover {
+  color: #FFBDBD;
+}
+
+/* ===== BOOK BUTTON ===== */
+/* ===== BOOK BUTTON (Improved) ===== */
+.book-btn {
+  display: inline-block;
+  text-align: center;
+  margin: 25px auto 5px;
+  background: #FFA4A4;
+  color: white;
+  font-weight: 600;
+  padding: 10px 28px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: 0.3s ease;
+  box-shadow: 0 4px 10px rgba(255,164,164,0.3);
+}
+
+.book-btn:hover {
+  background: #FFBDBD;
+  transform: scale(1.05);
+  box-shadow: 0 6px 15px rgba(255,189,189,0.5);
+}
+
+
+/* ===== ANIMATION ===== */
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(-20px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .event-grid {
+    grid-template-columns: 1fr;
+    padding: 10px 20px;
+  }
+
+  .event-card img {
+    height: 200px;
+  }
 }
