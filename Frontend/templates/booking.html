@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Booking – Seat Selection</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    body { font-family: system-ui, sans-serif; background:#fafafa; margin:0; padding:0; }
+    header { text-align:center; padding:20px; background:#2196f3; color:white; }
+    .sync-box { background:#fff; padding:14px; border-radius:10px; display:inline-block; margin:20px auto; box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+    #seat-container { display:grid; grid-template-columns:repeat(6,70px); gap:12px; justify-content:center; margin-top:20px;}
+    .seat { width:70px; height:70px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; font-weight:700; cursor:pointer;}
+    .available { background:#2ecc71; }
+    .held { background:#f39c12; cursor:not-allowed; opacity:0.95; }
+    .booked { background:#e74c3c; cursor:not-allowed; opacity:0.95; }
+    .controls { margin-top:18px; text-align:center; }
+    .btn { padding:10px 14px; border-radius:8px; text-decoration:none; background:#2196f3; color:white; border:none; cursor:pointer;}
+    .small { padding:6px 10px; font-size:0.9em;}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Seat Booking</h1>
+    <p>Step 1: Synchronize Time • Step 2: Book Your Seat</p>
+  </header>
+
+  <!-- ⏰ SYNC PHASE -->
+  <div class="sync-box" id="sync-box">
+    <strong>Clock Synchronization (Berkeley)</strong>
+    <div id="sync-state" style="margin-top:6px;">Enter your local time and synchronize with others.</div>
+    <div style="margin-top:10px;">
+      <input id="local-time-input" type="time" step="1">
+      <button id="sync-btn" class="btn small">Synchronize Time</button>
+    </div>
+    <div id="sync-result" style="margin-top:10px;color:#333;"></div>
+  </div>
+
+  <!-- 🎟️ BOOKING AREA -->
+  <div id="booking-area" style="display:none;">
+    <div class="controls">
+      <button id="refresh-btn" class="btn small">Refresh Seats</button>
+      <span style="margin-left:20px">Your held seat: <span id="my-held">None</span></span>
+    </div>
+
+    <div id="seat-container"></div>
+
+    <div style="text-align:center; margin-top:24px;">
+      <button id="confirm-btn" class="btn">Confirm Booking</button>
+      <button id="cancel-btn" class="btn" style="background:#9e9e9e;">Cancel Hold</button>
+    </div>
+  </div>
+
+<script>
+(async function(){
+  const refreshBtn = document.getElementById("refresh-btn");
+  const seatContainer = document.getElementById("seat-container");
+  const confirmBtn = document.getElementById("confirm-btn");
+  const cancelBtn = document.getElementById("cancel-btn");
+  const myHeldSpan = document.getElementById("my-held");
+  const bookingArea = document.getElementById("booking-area");
+  const syncBtn = document.getElementById("sync-btn");
+  const syncState = document.getElementById("sync-state");
+  const syncResult = document.getElementById("sync-result");
+  const timeInput = document.getElementById("local-time-input");
+
+  let myHeldSeat = null;
+
+  // ---------------- Heartbeat ----------------
+  setInterval(()=> fetch('/api/heartbeat', { method: 'POST' }).catch(()=>{}), 5000);
+
+  // ---------------- Seat rendering ----------------
+  async function fetchSeats(){
+    const res = await fetch('/api/seats');
+    const data = await res.json();
+    if(data.status === "error" && data.message.includes("Clock synchronization")){
+      return; // not ready yet
+    }
+    renderSeats(data);
+  }
+
+  function renderSeats(data){
+    seatContainer.innerHTML = "";
+    myHeldSeat = null;
+    for(const seatId of Object.keys(data)){
+      const info = data[seatId];
+      const div = document.createElement("div");
+      div.classList.add("seat", info.status);
+      div.textContent = seatId;
+
+      if(info.status === "available"){
+        div.onclick = () => holdSeat(seatId);
+      } else if(info.status === "held"){
+        if(info.held_by){
+          div.title = `Held by ${info.held_by}. Expires in ${info.hold_expires_in}s`;
+        }
+      } else if(info.status === "booked"){
+        div.title = "Booked";
+      }
+      seatContainer.appendChild(div);
+    }
+    if(!myHeldSeat) myHeldSpan.textContent = "None";
+  }
+
+  async function holdSeat(seatId){
+    const res = await fetch(`/api/hold/${seatId}`, { method: 'POST' });
+    const data = await res.json();
+    alert(data.message || JSON.stringify(data));
+    await fetchSeats();
+  }
+
+  async function confirmHold(){
+    const who = await (await fetch('/api/whoami')).json();
+    const resS = await fetch('/api/seats');
+    const seats = await resS.json();
+    let found = null;
+    for(const s of Object.keys(seats)){
+      if(seats[s].status === 'held' && seats[s].held_by === who.username){
+        found = s; break;
+      }
+    }
+    if(!found){ alert("You don't hold any seat"); return; }
+
+    const res = await fetch(`/api/confirm/${found}`, { method: 'POST' });
+    const data = await res.json();
+    alert(data.message || JSON.stringify(data));
+    myHeldSeat = null;
+    await fetchSeats();
+  }
+
+  async function cancelHold(){
+    const who = await (await fetch('/api/whoami')).json();
+    const resS = await fetch('/api/seats');
+    const seats = await resS.json();
+    let seatToCancel = null;
+    for(const s of Object.keys(seats)){
+      if(seats[s].status === 'held' && seats[s].held_by === who.username){
+        seatToCancel = s; break;
+      }
+    }
+    if(!seatToCancel){ alert("No held seat to cancel"); return; }
+    const res = await fetch(`/api/cancel_hold/${seatToCancel}`, { method: 'POST' });
+    const data = await res.json();
+    alert(data.message || JSON.stringify(data));
+    await fetchSeats();
+  }
+
+  refreshBtn.onclick = fetchSeats;
+  confirmBtn.onclick = confirmHold;
+  cancelBtn.onclick = cancelHold;
+
+  // ---------------- SYNC BUTTON (with time input) ----------------
+  syncBtn.onclick = async () => {
+    const timeVal = timeInput.value;
+    if(!timeVal){
+      alert("Please enter your current local time first!");
+      return;
+    }
+
+    // convert hh:mm:ss → current date with that time (in seconds)
+    const now = new Date();
+    const [hh, mm, ss] = timeVal.split(':').map(Number);
+    now.setHours(hh, mm, ss || 0, 0);
+    const localEpoch = now.getTime() / 1000.0;
+
+    syncState.textContent = "Synchronizing...";
+    syncResult.textContent = "";
+
+    const res = await fetch('/api/sync_time', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ client_time: localEpoch })
+    });
+    const data = await res.json();
+
+    if(data.status === "synced"){
+      syncState.textContent = "Synchronized Successfully!";
+      syncResult.textContent =
+        `Average Offset: ${data.avg_offset.toFixed(4)}s | Your Adjust: ${data.your_adjust.toFixed(4)}s | ` +
+        `${data.message}`;
+      document.getElementById('sync-box').style.display = "none";
+      bookingArea.style.display = "block";
+      fetchSeats();
+      setInterval(fetchSeats, 3000);
+    } else {
+      syncState.textContent = data.message || "Synchronization failed.";
+    }
+  };
+})();
+</script>
+</body>
+</html>

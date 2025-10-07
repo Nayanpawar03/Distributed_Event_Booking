@@ -1,0 +1,185 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: #f9f9f9;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 40px 20px;
+    border-radius: 0 0 20px 20px;
+}
+
+header .btn {
+    text-decoration: none;
+    color: #4CAF50;
+    background: white;
+    padding: 10px 20px;
+    margin: 5px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.auth-container {
+    background: white;
+    width: 300px;
+    margin: 80px auto;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #ccc;
+}
+
+.auth-container input {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+}
+
+.auth-container button {
+    background: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+}
+
+.msg { color: red; }
+
+#seat-container {
+    display: grid;
+    grid-template-columns: repeat(6, 60px);
+    justify-content: center;
+    gap: 10px;
+    margin-top: 30px;
+}
+
+.seat {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    cursor: pointer;
+    line-height: 60px;
+    font-weight: bold;
+    color: white;
+}
+
+.available {
+    background-color: #4CAF50;
+}
+
+.booked {
+    background-color: #f44336;
+    cursor: not-allowed;
+}
+
+
+body.landing {
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    height: 100vh;
+}
+
+header {
+    margin-top: 15%;
+}
+
+header h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+header p {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+
+.btn, .btn-outline {
+    padding: 12px 25px;
+    border-radius: 8px;
+    margin: 10px;
+    text-decoration: none;
+    font-weight: bold;
+    color: white;
+}
+
+.btn { background-color: #2196f3; }
+.btn-outline {
+    border: 2px solid #2196f3;
+    color: #2196f3;
+    background: none;
+}
+
+body.auth {
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: #f0f2f5;
+}
+
+form {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+form input {
+    display: block;
+    width: 250px;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+form button {
+    width: 100%;
+    background: #2196f3;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+body.dashboard {
+    font-family: 'Poppins', sans-serif;
+    background: #fafafa;
+    text-align: center;
+    padding: 20px;
+}
+
+.event-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 30px;
+}
+
+.event-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 10px;
+}
+
+.event-card img {
+    width: 100%;
+    border-radius: 12px;
+}
+
+.event-card h3 {
+    margin: 10px 0 5px;
+}
+
+.event-card p {
+    font-size: 0.9em;
+    color: #555;
+}

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard | Events</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="dashboard">
+    <h1>Welcome to the Event Dashboard 🎉</h1>
+    <p>Explore and book your favorite events below</p>
+
+    <div class="event-grid">
+        <div class="event-card">
+            <img src="static/images/concert.jpg" alt="Concert">
+            <h3>Rock Concert</h3>
+            <p>Join the biggest rock concert in your city!</p>
+            <a href="/booking" class="btn">Book Now</a>
+        </div>
+
+        <div class="event-card">
+            <img src="static/images/comedy.jpg" alt="Comedy Show">
+            <h3>Stand-up Comedy Night</h3>
+            <p>Laugh out loud with top comedians.</p>
+            <a href="/booking" class="btn">Book Now</a>
+        </div>
+
+        <div class="event-card">
+            <img src="static/images/sports.jpg" alt="Sports">
+            <h3>Cricket Match</h3>
+            <p>Catch your favorite teams live in action!</p>
+            <a href="/booking" class="btn">Book Now</a>
+        </div>
+
+        <div class="event-card">
+            <img src="static/images/theatre.jpeg" alt="Theatre">
+            <h3>Drama Night</h3>
+            <p>Experience an evening of fine theatre.</p>
+            <a href="/booking" class="btn">Book Now</a>
+        </div>
+
+    </div>
+</body>
+</html>
