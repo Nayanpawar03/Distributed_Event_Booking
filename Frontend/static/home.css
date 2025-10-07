@@ -1,0 +1,58 @@
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #FCF9EA, #BADFDB);
+  color: #333;
+  margin: 0;
+  text-align: center;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+header h1 {
+  font-size: 2.8em;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+header p {
+  font-size: 1.1em;
+  color: #444;
+  margin-bottom: 25px;
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.btn, .btn-outline {
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: 0.3s ease;
+}
+
+.btn {
+  background: #BADFDB;
+  color: #333;
+}
+
+.btn:hover {
+  background: #FFA4A4;
+  color: white;
+}
+
+.btn-outline {
+  border: 2px solid #BADFDB;
+  color: #333;
+  background: none;
+}
+
+.btn-outline:hover {
+  background: #BADFDB;
+  color: white;
+}
