@@ -236,14 +236,12 @@ def sync_time():
         })
 
 
-
-@app.route('/api/heartbeat', methods=['POST'])
-def heartbeat():
     """Keeps the current user marked active and prevents 404 spam."""
     if 'username' in session:
         active_users[session['username']] = time.time()
         return jsonify({"status": "ok"})
     return jsonify({"status": "error", "message": "not logged in"}), 401
+
 # ---------------- Booking / Seats ----------------
 def cleanup_expired_holds():
     """Release expired holds."""
@@ -372,6 +370,49 @@ def whoami():
 @app.route('/static/<path:path>')
 def send_static_file(path):
     return send_from_directory(app.static_folder, path)
+
+
+# ---------------- Heartbeat Support ----------------
+HEARTBEAT_TIMEOUT = 20  # seconds before user considered inactive
+PRUNE_INTERVAL = 5      # seconds between pruning
+
+def prune_inactive_users_background():
+    """Background thread to remove inactive users and release their holds."""
+    while True:
+        now = time.time()
+        to_remove = []
+        for u, last_seen in list(active_users.items()):
+            if now - last_seen > HEARTBEAT_TIMEOUT:
+                to_remove.append(u)
+
+        for u in to_remove:
+            print(f"[HEARTBEAT] User '{u}' inactive for {HEARTBEAT_TIMEOUT}s, removing...")
+            active_users.pop(u, None)
+            announced_times.pop(u, None)
+
+            # Release any seats held by this user
+            for seat_id, h in list(holders.items()):
+                if h.get("user") == u:
+                    seats[seat_id] = "available"
+                    holders.pop(seat_id, None)
+                    print(f"[HEARTBEAT] Seat '{seat_id}' released due to inactivity of user '{u}'")
+
+        time.sleep(PRUNE_INTERVAL)
+
+@app.route('/api/heartbeat', methods=['POST'])
+def heartbeat():
+    """Mark the current user as active and print for demo."""
+    if 'username' not in session:
+        return jsonify({"status": "error", "message": "not logged in"}), 401
+
+    username = session['username']
+    active_users[username] = time.time()  # keep existing functionality
+    print(f"[HEARTBEAT] Received from '{username}' at {time.strftime('%H:%M:%S', time.localtime())}")
+    return jsonify({"status": "ok"})
+
+# ---------------- Start Background Thread ----------------
+threading.Thread(target=prune_inactive_users_background, daemon=True).start()
+print("[SYSTEM] Heartbeat pruning thread started")
 
 
 if __name__ == '__main__':
