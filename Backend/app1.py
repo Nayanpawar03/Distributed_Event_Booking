@@ -3,6 +3,9 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 from flask_cors import CORS
 from shared_data import seats, locks, holders
 import json, os, time, threading
+from db_config import get_db_connection
+from werkzeug.security import generate_password_hash, check_password_hash
+
 
 # config
 HOLD_SECONDS = 30
@@ -25,21 +28,21 @@ sync_completed = False     # ✅ new flag
 sync_lock = threading.Lock()
 
 # ---------------- Helpers ----------------
-def load_users():
-    if not os.path.exists(USERS_FILE):
-        return {}
-    try:
-        with open(USERS_FILE, "r") as f:
-            content = f.read().strip()
-            if not content:
-                return {}
-            return json.loads(content)
-    except json.JSONDecodeError:
-        return {}
+# def load_users():
+#     if not os.path.exists(USERS_FILE):
+#         return {}
+#     try:
+#         with open(USERS_FILE, "r") as f:
+#             content = f.read().strip()
+#             if not content:
+#                 return {}
+#             return json.loads(content)
+#     except json.JSONDecodeError:
+#         return {}
 
-def save_users(users):
-    with open(USERS_FILE, "w") as f:
-        json.dump(users, f, indent=4)
+# def save_users(users):
+#     with open(USERS_FILE, "w") as f:
+#         json.dump(users, f, indent=4)
 
 def prune_active_users(timeout=60):
     """Remove inactive users."""
@@ -68,31 +71,60 @@ def home():
 def signup():
     if request.method == 'POST':
         username = request.form['username']
+        email = request.form['email']
         password = request.form['password']
-        users = load_users()
 
-        if username in users:
-            return render_template("signup.html", message="Username already exists!")
-        users[username] = {"password": password}
-        save_users(users)
+        # hash the password before storing
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # check if username or email already exist
+        cur.execute("SELECT * FROM users WHERE username = %s OR email = %s", (username, email))
+        existing_user = cur.fetchone()
+
+        if existing_user:
+            cur.close()
+            conn.close()
+            return render_template("signup.html", message="Username or email already exists!")
+
+        cur.execute(
+            "INSERT INTO users (username, email, password) VALUES (%s, %s, %s)",
+            (username, email, hashed_password)
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+
         return redirect(url_for('login'))
 
     return render_template("signup.html")
 
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
+        user_input = request.form['username']  # can be username or email
         password = request.form['password']
-        users = load_users()
 
-        if username in users and users[username]['password'] == password:
-            session['username'] = username
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM users WHERE username = %s OR email = %s", (user_input, user_input))
+        user = cur.fetchone()
+        cur.close()
+        conn.close()
+
+        if user and check_password_hash(user[3], password):  # verify hashed password
+            session['username'] = user[1]  # index 1 = username
             return redirect(url_for('dashboard'))
         else:
             return render_template("login.html", message="Invalid credentials")
 
     return render_template("login.html")
+
+
 
 @app.route('/logout')
 def logout():
